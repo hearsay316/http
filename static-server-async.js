@@ -2,13 +2,14 @@ const http = require("http"); //获取http请求
 const url = require("url");
 const path = require("path");
 const fs = require("fs").promises;
+const chalk = require("chalk");
 // noinspection NpmUsedModulesInstalled
 const mime = require("mime");
 const { createReadStream } = require("fs");
 class Server {
   constructor({ port, cwd }) {
-  this.port = port||3000;
-  this.cwd = cwd||process.cwd();
+    this.port = port || 3000;
+    this.cwd = cwd || process.cwd();
   }
   async handleRequest(req, res) {
     let { pathname } = url.parse(req.url);
@@ -32,14 +33,18 @@ class Server {
     createReadStream(filepath).pipe(res);
   }
   sendError(req, res, e) {
-    console.log(e);
+    console.log(e, "555");
     res.statusCode = 404;
     res.end("Not found");
   }
   start() {
     let server = http.createServer(this.handleRequest.bind(this));
     server.listen(this.port, () => {
-      console.log("server start " + this.port);
+      console.log(`${chalk.yellow("Starting up http-server, serving ./")}
+Available on:
+http://127.0.0.1:${chalk.green(this.port)}
+Hit CTRL-C to stop the server
+    `);
     });
   }
 }

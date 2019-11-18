@@ -1,9 +1,15 @@
 #!/usr/bin/env node
-console.log("wdw");
+
 let cwd = process.cwd();
+let program = require("commander");
+program
+  .option("-p, --port <types>","set port")
+  .option("-dir, --directory <types>","set directory");
+let opts = program.parse(process.argv);
 let Server = require("../static-server-async.js");
 let server = new Server({
   port:4000,
-  cwd:cwd
+  cwd:cwd,
+  ...opts
 });
 server.start();

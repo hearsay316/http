@@ -9,7 +9,7 @@ http
     let { pathname, query } = url.parse(req.url, true);
     let absPath = path.join(__dirname, pathname);
     fs.stat(absPath, (err, stats) => {
-      if (err) {res.statusCode = 404;return res.end()}
+      if (err) {res.statusCode = 404; console.log(err);return res.end()}
       if (!stats.isFile()) {
         /**
          * 如果是文件夹找index
