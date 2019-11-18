@@ -6,9 +6,13 @@ const fs = require("fs").promises;
 const mime = require("mime");
 const { createReadStream } = require("fs");
 class Server {
+  constructor({ port, cwd }) {
+  this.port = port||3000;
+  this.cwd = cwd||process.cwd();
+  }
   async handleRequest(req, res) {
     let { pathname } = url.parse(req.url);
-    let filepath = path.join(__dirname, pathname);
+    let filepath = path.join(this.cwd, pathname);
     try {
       let statObj = await fs.stat(filepath);
       if (statObj.isDirectory()) {
@@ -18,13 +22,13 @@ class Server {
       // let content = await fs.readFile(filepath, "utf8");
       // res.end(content);
       // 也可以用流
-      this.seadFile(req,res,filepath)
+      this.sendFile(req, res, filepath);
     } catch (e) {
       this.sendError(req, res, e);
     }
   }
-  seadFile(req,res,filepath){
-    res.setHeader("Content",mime.getType(filepath)+";charset=utf-8")
+  sendFile(req, res, filepath) {
+    res.setHeader("Content", mime.getType(filepath) + ";charset=utf-8");
     createReadStream(filepath).pipe(res);
   }
   sendError(req, res, e) {
@@ -32,15 +36,14 @@ class Server {
     res.statusCode = 404;
     res.end("Not found");
   }
-  start(port) {
+  start() {
     let server = http.createServer(this.handleRequest.bind(this));
-    server.listen(port, () => {
-      console.log("server start " + port);
+    server.listen(this.port, () => {
+      console.log("server start " + this.port);
     });
   }
 }
-let server = new Server();
-server.start("3000");
+module.exports = Server;
 // http
 //   .createServer((req, res) => {
 //     let { pathname, query } = url.parse(req.url, true);

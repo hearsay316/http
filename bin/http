@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+console.log("wdw");
+let cwd = process.cwd();
+let Server = require("../static-server-async.js");
+let server = new Server({
+  port:4000,
+  cwd:cwd
+});
+server.start();

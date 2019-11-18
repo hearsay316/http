@@ -1,0 +1,23 @@
+{
+  "name": "http",
+  "version": "1.0.0",
+  "description": "",
+  "main": "static-server-async.js",
+  "bin": {
+    "http": "./bin/http"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hearsay316/http.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hearsay316/http/issues"
+  },
+  "homepage": "https://github.com/hearsay316/http#readme"
+}
