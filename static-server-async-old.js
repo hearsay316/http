@@ -5,43 +5,31 @@ const fs = require("fs").promises;
 const chalk = require("chalk");
 // noinspection NpmUsedModulesInstalled
 const mime = require("mime");
-const { createReadStream, readFileSync } = require("fs");
-const ejs = require("ejs");
-const template = readFileSync(path.resolve(__dirname, "template.html"), "utf8");
+const { createReadStream } = require("fs");
 class Server {
   constructor({ port, cwd }) {
     this.port = port || 3000;
     this.cwd = cwd || process.cwd();
-    this.template = template;
   }
   async handleRequest(req, res) {
     let { pathname } = url.parse(req.url);
-    pathname = decodeURIComponent(pathname);
     let filepath = path.join(this.cwd, pathname);
     try {
       let statObj = await fs.stat(filepath);
       if (statObj.isDirectory()) {
         // filepath = path.join(filepath, "index.html");
         // await fs.access(filepath);
-        let dist = await fs.readdir(filepath);
-        let str = ejs.render(this.template, { arr: dist,currentPath:pathname==="/"?"":pathname });
-         res.setHeader("Content-Type", "text/html;charset=utf-8");
-         res.end(str);
-      }else {
-        this.sendFile(req, res, filepath);
       }
       // let content = await fs.readFile(filepath, "utf8");
       // res.end(content);
       // 也可以用流
-      
+      this.sendFile(req, res, filepath);
     } catch (e) {
       this.sendError(req, res, e);
     }
   }
   sendFile(req, res, filepath) {
-    console.log(filepath,2222,mime.getType(filepath));
-    res.setHeader("Content-Type", mime.getType(filepath)+";charset=utf-8");
-    console.log(req);
+    res.setHeader("Content", mime.getType(filepath) + ";charset=utf-8");
     createReadStream(filepath).pipe(res);
   }
   sendError(req, res, e) {
@@ -53,9 +41,9 @@ class Server {
     let server = http.createServer(this.handleRequest.bind(this));
     server.listen(this.port, () => {
       console.log(`${chalk.yellow("Starting up http-server, serving ./")}
-    Available on:
-    http://127.0.0.1:${chalk.green(this.port)}
-    Hit CTRL-C to stop the server
+Available on:
+http://127.0.0.1:${chalk.green(this.port)}
+Hit CTRL-C to stop the server
     `);
     });
   }

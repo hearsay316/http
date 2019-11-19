@@ -23,6 +23,7 @@
   "dependencies": {
     "chalk": "^3.0.0",
     "commander": "^4.0.1",
+    "ejs": "^2.7.3",
     "mime": "^2.4.4"
   }
 }

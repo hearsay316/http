@@ -6,7 +6,9 @@
     <title>Title</title>
 </head>
 <body>
-hello
-<script src="/index.js"></script>
+<%arr.forEach(item=>{%>
+<li><a href="<%=currentPath%>/<%=item%>"><%=currentPath%><%=item%></a></li>
+
+<%})%>
 </body>
 </html>
