@@ -32,7 +32,8 @@ class Server {
       // res.end(content);
       // 也可以用流
     } catch (e) {
-      if (e.code === "ENOENT") {
+      console.log(e);
+      if (e.path.includes("index.html")) {
         let dist = await fs.readdir(filepath);
         let str = ejs.render(this.template, {
           arr: dist,
