@@ -65,28 +65,13 @@ class Server {
     Hit CTRL-C to stop the server
     `);
     });
+    server.on("error",(err)=>{
+      console.log(err,66666666)
+      if(err.code==="EADDRINUSE"){
+        ++this.port;
+        this.start()
+      }
+    })
   }
 }
 module.exports = Server;
-// http
-//   .createServer((req, res) => {
-//     let { pathname, query } = url.parse(req.url, true);
-//     let absPath = path.join(__dirname, pathname);
-//     fs.stat(absPath, (err, stats) => {
-//       if (err) {res.statusCode = 404;return res.end()}
-//       if (!stats.isFile()) {
-//         /**
-//          * 如果是文件夹找index
-//          * */
-//         absPath = path.join(absPath, "index.html");
-//         fs.access(absPath, error => {
-//           if (error) {res.statusCode = 404; return res.end();
-//           }
-//         });
-//       }
-//       //判断是不是文件
-//       res.setHeader("Content-type", mime.getType(absPath) + ";charset=utf-8");
-//       fs.createReadStream(absPath).pipe(res);
-//     });
-//   })
-//   .listen(3000);
