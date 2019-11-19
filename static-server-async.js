@@ -5,7 +5,7 @@ const fs = require("fs").promises;
 const chalk = require("chalk");
 // noinspection NpmUsedModulesInstalled
 const mime = require("mime");
-const { createReadStream, readFileSync } = require("fs");
+const { createReadStream, readFileSync, constants } = require("fs");
 const ejs = require("ejs");
 const template = readFileSync(path.resolve(__dirname, "template.html"), "utf8");
 class Server {
@@ -21,27 +21,33 @@ class Server {
     try {
       let statObj = await fs.stat(filepath);
       if (statObj.isDirectory()) {
-        // filepath = path.join(filepath, "index.html");
-        // await fs.access(filepath);
-        let dist = await fs.readdir(filepath);
-        let str = ejs.render(this.template, { arr: dist,currentPath:pathname==="/"?"":pathname });
-         res.setHeader("Content-Type", "text/html;charset=utf-8");
-         res.end(str);
-      }else {
+        let filepathIndex = path.join(filepath, "index.html");
+        await fs.access(filepathIndex, constants.F_OK);
+        console.log(filepath, filepathIndex);
+        this.sendFile(req, res, filepathIndex);
+      } else {
         this.sendFile(req, res, filepath);
       }
       // let content = await fs.readFile(filepath, "utf8");
       // res.end(content);
       // 也可以用流
-      
     } catch (e) {
-      this.sendError(req, res, e);
+      if (e.code === "ENOENT") {
+        let dist = await fs.readdir(filepath);
+        let str = ejs.render(this.template, {
+          arr: dist,
+          currentPath: pathname === "/" ? "" : pathname
+        });
+        res.setHeader("Content-Type", "text/html;charset=utf-8");
+        res.end(str);
+      } else {
+        this.sendError(req, res, e);
+      }
     }
   }
   sendFile(req, res, filepath) {
-    console.log(filepath,2222,mime.getType(filepath));
-    res.setHeader("Content-Type", mime.getType(filepath)+";charset=utf-8");
-    console.log(req);
+    console.log(filepath, 2222, mime.getType(filepath));
+    res.setHeader("Content-Type", mime.getType(filepath) + ";charset=utf-8");
     createReadStream(filepath).pipe(res);
   }
   sendError(req, res, e) {
