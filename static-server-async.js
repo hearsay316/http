@@ -27,14 +27,13 @@ class Server {
         await fs.access(filepathIndex, constants.F_OK);
         this.sendFile(req, res, filepathIndex);
       } else {
-        console.log(filepath,66666);
         this.sendFile(req, res, filepath);
       }
       // let content = await fs.readFile(filepath, "utf8");
       // res.end(content);
       // 也可以用流
     } catch (e) {
-       console.log(e);
+      // console.log(e);
       if (e.path.includes(this.index)) {
         let dist = await fs.readdir(filepath);
         let str = ejs.render(this.template, {
@@ -56,7 +55,7 @@ class Server {
   sendError(req, res, e) {
   //  console.log(e, "555");
     res.statusCode = 404;
-    res.end("Not found");
+    res.end(JSON.stringify(e));
   }
   start() {
     let server = http.createServer(this.handleRequest.bind(this));
