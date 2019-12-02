@@ -1,12 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>index</title>
-</head>
-<body>
-<div>index222yyyy</div>
-<script src="index.js"></script>
-</body>
+  </head>
+  <body>
+    <div>index222yyyddy</div>
+    <button id="btn">按钮</button>
+    <script>
+      let btn = document.querySelector("#btn");
+      btn.onclick = function() {
+        let axja = new XMLHttpRequest();
+        axja.open("get", "/api");
+        axja.onload = function(data) {
+          console.log(data);
+        };
+        axja.send();
+      };
+    </script>
+  </body>
 </html>
