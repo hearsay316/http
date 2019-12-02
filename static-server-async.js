@@ -9,10 +9,11 @@ const { createReadStream, readFileSync, constants } = require("fs");
 const ejs = require("ejs");
 const template = readFileSync(path.resolve(__dirname, "template.html"), "utf8");
 class Server {
-  constructor({ port, cwd }) {
+  constructor({ port, cwd ,index}) {
     this.port = port || 3000;
     this.cwd = cwd || process.cwd();
     this.template = template;
+    this.index = index|| "index.html";
   }
   async handleRequest(req, res) {
     let { pathname } = url.parse(req.url);
@@ -21,7 +22,7 @@ class Server {
     try {
       let statObj = await fs.stat(filepath);
       if (statObj.isDirectory()) {
-        let filepathIndex = path.join(filepath, "index.html");
+        let filepathIndex = path.join(filepath, this.index);
         await fs.access(filepathIndex, constants.F_OK);
         console.log(filepath, filepathIndex);
         this.sendFile(req, res, filepathIndex);
@@ -33,7 +34,7 @@ class Server {
       // 也可以用流
     } catch (e) {
       console.log(e);
-      if (e.path.includes("index.html")) {
+      if (e.path.includes(this.index)) {
         let dist = await fs.readdir(filepath);
         let str = ejs.render(this.template, {
           arr: dist,
@@ -47,7 +48,7 @@ class Server {
     }
   }
   sendFile(req, res, filepath) {
-    console.log(filepath, 2222, mime.getType(filepath));
+    console.log(filepath, "属性", mime.getType(filepath));
     res.setHeader("Content-Type", mime.getType(filepath) + ";charset=utf-8");
     createReadStream(filepath).pipe(res);
   }
@@ -66,7 +67,7 @@ class Server {
     `);
     });
     server.on("error",(err)=>{
-      console.log(err,66666666)
+     // console.log(err,66666666)
       if(err.code==="EADDRINUSE"){
         ++this.port;
         this.start()
