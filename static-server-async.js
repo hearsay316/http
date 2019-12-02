@@ -76,3 +76,5 @@ class Server {
   }
 }
 module.exports = Server;
+// 304 缓存 http 缓存
+//  强制缓存  协商缓存
