@@ -19,7 +19,6 @@ class Server {
     let { pathname } = url.parse(req.url);
     pathname = decodeURIComponent(pathname);
     let filepath = path.join(this.cwd, pathname);
-    console.log(filepath);
     try {
       let statObj = await fs.stat(filepath);
       if (statObj.isDirectory()) {
@@ -47,32 +46,26 @@ class Server {
       }
     }
   }
-  cache(req, res,statObj) {
+  cache(req, res, statObj) {
     let ifNoneMatch = req.headers["if-none-match"];
     let ifModifiedSince = req.headers["if-modified-since"];
     let currentEtag = "abc" + statObj.size;
     let currentLastModified = statObj.ctime.toUTCString();
     res.setHeader("Etag", currentEtag);
     res.setHeader("Last-Modified", currentLastModified);
-    console.log(ifNoneMatch !== currentEtag);
-    console.log(ifModifiedSince,currentLastModified,ifModifiedSince !== currentLastModified);
     if (ifNoneMatch !== currentEtag) {
       return false;
     }
-    if (ifModifiedSince !== currentLastModified) {
-      return false;
-    }
-    return true;
+    return ifModifiedSince === currentLastModified;
+    
   }
   sendFile(req, res, filepath, statObj) {
     //  console.log(filepath, "属性", mime.getType(filepath));
     //  加缓存  强制缓存 和协商缓存  +etag
-    res.setHeader("Content-Control", "max-age=10");
-    res.setHeader(
-      "Expires",
-      new Date(Date.now() + 10 * 1000).toUTCString()
-    );
-    if (this.cache(req, res,statObj)) {
+    console.log(filepath);
+    res.setHeader("Cache-Control", "max-age=10");
+    res.setHeader("Expires", new Date(Date.now() + 10 * 1000).toUTCString());
+    if (this.cache(req, res, statObj)) {
       res.statusCode = 304;
       return res.end();
     }
