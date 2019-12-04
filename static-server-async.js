@@ -19,15 +19,15 @@ class Server {
     let { pathname } = url.parse(req.url);
     pathname = decodeURIComponent(pathname);
     let filepath = path.join(this.cwd, pathname);
-    console.log(filepath)
+    console.log(filepath);
     try {
       let statObj = await fs.stat(filepath);
       if (statObj.isDirectory()) {
         let filepathIndex = path.join(filepath, this.index);
         await fs.access(filepathIndex, constants.F_OK);
-        this.sendFile(req, res, filepathIndex);
+        this.sendFile(req, res, filepathIndex, statObj);
       } else {
-        this.sendFile(req, res, filepath);
+        this.sendFile(req, res, filepath, statObj);
       }
       // let content = await fs.readFile(filepath, "utf8");
       // res.end(content);
@@ -47,13 +47,40 @@ class Server {
       }
     }
   }
-  sendFile(req, res, filepath) {
-  //  console.log(filepath, "属性", mime.getType(filepath));
+  cache(req, res,statObj) {
+    let ifNoneMatch = req.headers["if-none-match"];
+    let ifModifiedSince = req.headers["if-modified-since"];
+    let currentEtag = "abc" + statObj.size;
+    let currentLastModified = statObj.ctime.toUTCString();
+    res.setHeader("Etag", currentEtag);
+    res.setHeader("Last-Modified", currentLastModified);
+    console.log(ifNoneMatch !== currentEtag);
+    console.log(ifModifiedSince,currentLastModified,ifModifiedSince !== currentLastModified);
+    if (ifNoneMatch !== currentEtag) {
+      return false;
+    }
+    if (ifModifiedSince !== currentLastModified) {
+      return false;
+    }
+    return true;
+  }
+  sendFile(req, res, filepath, statObj) {
+    //  console.log(filepath, "属性", mime.getType(filepath));
+    //  加缓存  强制缓存 和协商缓存  +etag
+    res.setHeader("Content-Control", "max-age=10");
+    res.setHeader(
+      "Expires",
+      new Date(Date.now() + 10 * 1000).toUTCString()
+    );
+    if (this.cache(req, res,statObj)) {
+      res.statusCode = 304;
+      return res.end();
+    }
     res.setHeader("Content-Type", mime.getType(filepath) + ";charset=utf-8");
     createReadStream(filepath).pipe(res);
   }
   sendError(req, res, e) {
-  //  console.log(e, "555");
+    //  console.log(e, "555");
     res.statusCode = 404;
     res.end(JSON.stringify(e));
   }
