@@ -36,7 +36,7 @@ class aa{
     console.log(this)
   }
 }
-let bb =new aa()
+let bb =new aa();
 bb.name = 12;
 //Object.defineProperty(bb,"constructor")
 // bb.constructor=function () {
@@ -45,4 +45,3 @@ bb.name = 12;
 console.log(bb.constructor.toString().match(/;/,""));
 // aa.apply({name:222})
  // aa()
-

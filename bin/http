@@ -2,9 +2,10 @@
 
 let cwd = process.cwd();
 let program = require("commander");
+program._helpDescription = '输出帮助内容';
 program
-  .option("-p, --port <types>","set port")
-  .option("-dir, --directory <types>","set directory")
+  .option("-p, --port <types>","设置端口")
+  .option("-dir, --directory <types>","设置文件夹")
   .option("-index, --index <types>","设置首页");
 let opts = program.parse(process.argv);
 let Server = require("../static-server-async.js");

@@ -7,6 +7,7 @@ const chalk = require("chalk");
 const mime = require("mime");
 const { createReadStream, readFileSync, constants } = require("fs");
 const ejs = require("ejs");
+const zlib = require("zlib");
 const template = readFileSync(path.resolve(__dirname, "template.html"), "utf8");
 class Server {
   constructor({ port, cwd, index }) {
@@ -57,7 +58,17 @@ class Server {
       return false;
     }
     return ifModifiedSince === currentLastModified;
-    
+  }
+  gzip(req, res, statObj) {
+    let encoding = req.headers["accept-encoding"];
+    if (encoding.match(/gzip/)) {
+      // 支持压缩
+      res.setHeader("Content-Encoding","gzip");
+      return zlib.createGzip();
+    } else if (encoding.match(/deflate/)) {
+      res.setHeader("Content-Encoding","deflate");
+      return zlib.createDeflate();
+    }
   }
   sendFile(req, res, filepath, statObj) {
     //  console.log(filepath, "属性", mime.getType(filepath));
@@ -68,6 +79,14 @@ class Server {
     if (this.cache(req, res, statObj)) {
       res.statusCode = 304;
       return res.end();
+    }
+    let gzip;
+    if ((gzip = this.gzip(req, res, statObj))) {
+      res.setHeader("Content-Type", mime.getType(filepath) + ";charset=utf-8");
+      createReadStream(filepath)
+        .pipe(gzip)
+        .pipe(res);
+      return;
     }
     res.setHeader("Content-Type", mime.getType(filepath) + ";charset=utf-8");
     createReadStream(filepath).pipe(res);
